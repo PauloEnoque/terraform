@@ -16,7 +16,7 @@ data "aws_subnets" "default" {
 variable "server_port" {
   description = "The port the server will use for HTTP requests"
   type = number
-  default = 8080
+  default = 80
 }
 
 output "alb_dns_name" {
@@ -25,14 +25,16 @@ output "alb_dns_name" {
 }
 
 resource "aws_launch_configuration" "example" {
-  image_id = "ami-0fb653ca2d3203ac1"
-  instance_type = "t3.micro"
+  image_id = "ami-09d9029d9fc5e5238"
+  instance_type = "t2.micro"
   security_groups = [aws_security_group.instance.id ]
 
   user_data = <<-EOF
                 #!/bin/bash
-                sudo apt-get update
-                sudo apt-get install apache2
+                sudo yum update -y
+                sudo yum install -y httpd.x86_64
+                sudo systemctl start httpd.service
+                sudo systemctl enable httpd.service
                 EOF
   
   # To create instances before destroying the old ones, usefill for ASG
@@ -144,5 +146,19 @@ resource "aws_security_group" "instance" {
     to_port = var.server_port
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+    egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = [ "0.0.0.0/0" ]
   }
 }
