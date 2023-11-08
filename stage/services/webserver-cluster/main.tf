@@ -1,3 +1,14 @@
+terraform {
+  backend "s3" {
+    bucket = "psafrao-terraform-up-and-running-state"
+    key = "stage/services/webservercluster/terraform.tfstate"
+    region = "us-east-2"
+
+    dynamodb_table = "terraform-up-and-running-locks"
+    encrypt = true
+  }
+}
+
 provider "aws" {
   region = "us-east-2"
 }
@@ -11,17 +22,6 @@ data "aws_subnets" "default" {
     name = "vpc-id"
     values = [ data.aws_vpc.default.id ]
   }
-}
-
-variable "server_port" {
-  description = "The port the server will use for HTTP requests"
-  type = number
-  default = 80
-}
-
-output "alb_dns_name" {
-  value = aws_lb.example.dns_name
-  description = "The domain name of the load balancer"
 }
 
 resource "aws_launch_configuration" "example" {
