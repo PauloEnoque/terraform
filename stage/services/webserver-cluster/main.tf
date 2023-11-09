@@ -13,6 +13,16 @@ provider "aws" {
   region = "us-east-2"
 }
 
+data "terrafrom_remote_state" "db" {
+  backend = "s3"
+
+  config = {
+    bucket = "psafrao-terraform-up-and-running-state"
+    key = "stage/data-stores/mysql/terraform.tfstate"
+    region = "us-east-2"
+  }
+}
+
 data "aws_vpc" "default" {
   default = true
 }
